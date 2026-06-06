@@ -1,0 +1,59 @@
+---
+title: "Goodness-of-fit tests and the bootstrap"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Goodness-of-fit tests and the bootstrap}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+```
+
+```{r setup}
+library(logcumulant)
+data(reliability_datasets)
+```
+
+## The three nested statistics
+
+For a candidate family fitted by maximum likelihood, the package computes a
+Hotelling-type quadratic form in the discrepancy between the sample and fitted
+log-cumulants. Three nested choices of cumulant orders give three statistics:
+
+- \(T^2_{(2,3)}\): log-scale shape (dispersion, skewness);
+- \(T^2_{(1,2,3)}\): adds the first log-cumulant (entropy/scale);
+- \(T^2_{(1,\ldots,6)}\): adds higher-order cumulants for tail discrimination.
+
+```{r}
+x <- reliability_datasets$Yarn
+T2_all(x, "Weibull")
+```
+
+## Why the bootstrap?
+
+The discrepancy covariance \(\mathbf{K}_d\) is typically ill-conditioned: one
+eigenvalue is much smaller than the others and is estimated with large relative
+error. As a result the asymptotic chi-squared reference **over-rejects**, and the
+distortion does not vanish as the sample grows. The parametric bootstrap
+reproduces the ill-conditioning in each replicate, so it cancels in the
+bootstrap p-value.
+
+```{r}
+T2_bootstrap(x, "Weibull", B = 299, seed = 1)
+```
+
+In practice, prefer the bootstrap p-values for all sample sizes.
+
+## Full model comparison
+
+`gof_compare_all()` runs the three \(T^2\) tests, the Anderson--Darling and
+Cramer--von Mises tests, and the AIC across all six families:
+
+```{r}
+gof_compare_all(x, use_bootstrap = TRUE, B = 199, seed = 1)
+```
+
+The \(T^2\) tests and the EDF tests are **complementary**: the former are most
+sensitive to subtle log-shape departures, the latter to tail departures.

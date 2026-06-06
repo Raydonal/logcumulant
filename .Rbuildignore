@@ -1,0 +1,10 @@
+^docs$
+^pkgdown$
+^_pkgdown\.yml$
+^\.github$
+^reproduce_all_figures\.R$
+^.*\.Rproj$
+^\.Rproj\.user$
+^LICENSE\.md$
+^cran-comments\.md$
+^logcumulant_site\.zip$

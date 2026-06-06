@@ -1,0 +1,68 @@
+url: https://raydonal.github.io/logcumulant/
+
+template:
+  bootstrap: 5
+  bslib:
+    primary: "#377EB8"
+
+home:
+  title: Goodness-of-Fit Tests Based on Mellin Log-Cumulants
+  description: >
+    Hotelling-type T-squared goodness-of-fit tests and diagnostic diagrams for
+    positive-support reliability data, built on Mellin log-cumulants.
+
+navbar:
+  structure:
+    left:  [intro, reference, articles, news]
+    right: [search, github]
+  components:
+    articles:
+      text: Articles
+      menu:
+      - text: Getting started
+        href: articles/getting-started.html
+      - text: The three diagnostic diagrams
+        href: articles/diagrams.html
+      - text: Goodness-of-fit tests and the bootstrap
+        href: articles/gof-tests.html
+      - text: Simulation studies
+        href: articles/simulation.html
+
+reference:
+- title: Diagnostic diagrams
+  desc: Moment-ratio-style diagrams with bootstrap clouds and concentration ellipses.
+  contents:
+  - log_cumulant_diagram
+  - kurtosis_diagram
+  - cv_diagram
+  - three_diagrams
+  - multi_lc_diagram
+  - plot_lc
+- title: Goodness-of-fit tests
+  desc: The three nested T-squared statistics and the comparison interface.
+  contents:
+  - T2_one
+  - T2_all
+  - T2_bootstrap
+  - gof_analyze
+  - gof_compare_all
+  - ad_cvm_test
+  - aic_value
+- title: Distribution building blocks
+  desc: Densities, fitting, theoretical log-cumulants, Jacobians and information.
+  contents:
+  - distribution_dispatchers
+  - mle_fit
+  - theoretical_lc
+  - jacobian_J
+  - fisher_closed
+- title: Simulation
+  contents:
+  - size_study
+  - power_study
+- title: Data
+  contents:
+  - reliability_datasets
+- title: Package
+  contents:
+  - logcumulant-package

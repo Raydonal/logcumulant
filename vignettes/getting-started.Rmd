@@ -1,0 +1,66 @@
+---
+title: "Getting started with logcumulant"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Getting started with logcumulant}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>",
+                      fig.width = 7, fig.height = 5, dpi = 96)
+```
+
+```{r setup}
+library(logcumulant)
+data(reliability_datasets)
+```
+
+## Why log-cumulants?
+
+For positive-support data the Mellin transform plays the role that the Fourier
+or Laplace transform plays on the whole line. Differentiating the Mellin
+characteristic function at its central point yields the **log-cumulants**
+\(\kappa_1, \kappa_2, \ldots\): the cumulants of \(\log X\). These quantities
+are natural shape descriptors for reliability distributions and behave well
+under the multiplicative structure typical of lifetime data.
+
+The package turns these descriptors into (i) diagnostic **diagrams** and (ii)
+formal **goodness-of-fit tests**.
+
+## A first analysis
+
+We use the classic ball-bearing fatigue-life dataset bundled with the package.
+
+```{r}
+bb <- reliability_datasets$BallBearing
+length(bb)
+summary(bb)
+```
+
+The quickest entry point is `plot_lc()`, which draws the log-cumulant diagram
+with a bootstrap cloud of the sample estimate:
+
+```{r}
+plot_lc(bb, B = 200)
+```
+
+The sample point sits near the Weibull and Gamma loci, suggesting a
+light-tailed model.
+
+## Comparing candidate models
+
+`gof_compare_all()` fits all six families and reports the three \(T^2\)
+statistics, the Anderson--Darling and Cramer--von Mises tests, and the AIC. The
+parametric bootstrap is recommended for the p-values:
+
+```{r}
+gof_compare_all(bb, use_bootstrap = TRUE, B = 199, seed = 1)
+```
+
+## Where to go next
+
+- `vignette("diagrams")` explains the three diagnostic diagrams.
+- `vignette("gof-tests")` covers the tests and why the bootstrap is needed.
+- `vignette("simulation")` reproduces the size and power studies.
