@@ -1,6 +1,36 @@
 # Changelog
 
+## logcumulant 0.1.1
+
+- Corrected the closed-form Fisher information matrices returned by
+  [`fisher_closed()`](https://raydonal.github.io/logcumulant/reference/fisher_closed.md)
+  for two families, to match the numerical observed information used by
+  default in
+  [`mle_fit()`](https://raydonal.github.io/logcumulant/reference/mle_fit.md):
+  - Frechet now uses the correct off-diagonal (cross) term
+    `+(1 - gamma)/b`. Weibull and Frechet share the same diagonal
+    entries but differ in the sign of the cross term (log-inversion
+    duality); the previous version returned the Weibull cross term for
+    both.
+  - Log-Logistic now returns `diag((pi^2 + 3)/(9 a^2), a^2/(3 b^2))`.
+    The previous version used `diag(pi^2/(3 a^2), 1/b^2)`, whose (1,1)
+    entry is the second log-cumulant `Var(log X)` rather than the shape
+    information, and whose (2,2) entry omitted the factor `a^2/3`.
+- Added a regression test (`tests/validate_fisher.R`) comparing
+  [`fisher_closed()`](https://raydonal.github.io/logcumulant/reference/fisher_closed.md)
+  against the Monte Carlo observed information for all six families.
+- Note: default inference (`T2_bootstrap`, `size_study`, `power_study`)
+  is unaffected, since the covariance is estimated from the observed
+  information
+  ([`mle_fit()`](https://raydonal.github.io/logcumulant/reference/mle_fit.md)),
+  not from these closed forms;
+  [`fisher_closed()`](https://raydonal.github.io/logcumulant/reference/fisher_closed.md)
+  is only used as a fallback when the numerical Hessian is not
+  invertible.
+
 ## logcumulant 0.1.0
+
+CRAN release: 2026-06-12
 
 - Initial release.
 - Three nested Hotelling-type T-squared goodness-of-fit statistics

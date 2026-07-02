@@ -39,7 +39,16 @@
     </div>
 
     <div class="section level2">
-<h2 class="pkg-version" data-toc-text="0.1.0" id="logcumulant-010">logcumulant 0.1.0<a class="anchor" aria-label="anchor" href="#logcumulant-010"></a></h2>
+<h2 class="pkg-version" data-toc-text="0.1.1" id="logcumulant-011">logcumulant 0.1.1<a class="anchor" aria-label="anchor" href="#logcumulant-011"></a></h2>
+<ul><li>Corrected the closed-form Fisher information matrices returned by <code><a href="../reference/fisher_closed.html">fisher_closed()</a></code> for two families, to match the numerical observed information used by default in <code><a href="../reference/mle_fit.html">mle_fit()</a></code>:
+<ul><li>Frechet now uses the correct off-diagonal (cross) term <code>+(1 - gamma)/b</code>. Weibull and Frechet share the same diagonal entries but differ in the sign of the cross term (log-inversion duality); the previous version returned the Weibull cross term for both.</li>
+<li>Log-Logistic now returns <code>diag((pi^2 + 3)/(9 a^2), a^2/(3 b^2))</code>. The previous version used <code>diag(pi^2/(3 a^2), 1/b^2)</code>, whose (1,1) entry is the second log-cumulant <code>Var(log X)</code> rather than the shape information, and whose (2,2) entry omitted the factor <code>a^2/3</code>.</li>
+</ul></li>
+<li>Added a regression test (<code>tests/validate_fisher.R</code>) comparing <code><a href="../reference/fisher_closed.html">fisher_closed()</a></code> against the Monte Carlo observed information for all six families.</li>
+<li>Note: default inference (<code>T2_bootstrap</code>, <code>size_study</code>, <code>power_study</code>) is unaffected, since the covariance is estimated from the observed information (<code><a href="../reference/mle_fit.html">mle_fit()</a></code>), not from these closed forms; <code><a href="../reference/fisher_closed.html">fisher_closed()</a></code> is only used as a fallback when the numerical Hessian is not invertible.</li>
+</ul></div>
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.1.0" id="logcumulant-010">logcumulant 0.1.0<a class="anchor" aria-label="anchor" href="#logcumulant-010"></a></h2><p class="text-muted">CRAN release: 2026-06-12</p>
 <ul><li>Initial release.</li>
 <li>Three nested Hotelling-type T-squared goodness-of-fit statistics (<code>T2_all</code>, <code>T2_bootstrap</code>) with parametric-bootstrap calibration.</li>
 <li>Three diagnostic diagrams (<code>log_cumulant_diagram</code>, <code>kurtosis_diagram</code>, <code>cv_diagram</code>), a combined panel (<code>three_diagrams</code>), a multi-dataset overlay (<code>multi_lc_diagram</code>), and the quick <code>plot_lc</code> interface.</li>
@@ -48,7 +57,8 @@
 <li>Size and power simulation utilities (<code>size_study</code>, <code>power_study</code>).</li>
 <li>Nine bundled reliability datasets (<code>reliability_datasets</code>).</li>
 </ul></div>
-  </main></div>
+  </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
+    </nav></aside></div>
 
 
     <footer><div class="pkgdown-footer-left">
