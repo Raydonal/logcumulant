@@ -43,13 +43,13 @@
 ldist <- function(x, dist, theta, log = TRUE) {
   a <- theta[1]; b <- theta[2]
   switch(dist,
-    Weibull     = dweibull(x, shape = a, scale = b, log = log),
-    Frechet     = VGAM::dfrechet(x, shape = a, scale = b, log = log),
-    Gamma       = dgamma(x, shape = a, scale = b, log = log),
-    InvGamma    = actuar::dinvgamma(x, shape = a, scale = b, log = log),
-    LogNormal   = dlnorm(x, meanlog = a, sdlog = b, log = log),
-    LogLogistic = actuar::dllogis(x, shape = a, scale = b, log = log),
-    stop("Unknown distribution: ", dist)
+         Weibull     = dweibull(x, shape = a, scale = b, log = log),
+         Frechet     = VGAM::dfrechet(x, shape = a, scale = b, log = log),
+         Gamma       = dgamma(x, shape = a, scale = b, log = log),
+         InvGamma    = actuar::dinvgamma(x, shape = a, scale = b, log = log),
+         LogNormal   = dlnorm(x, meanlog = a, sdlog = b, log = log),
+         LogLogistic = actuar::dllogis(x, shape = a, scale = b, log = log),
+         stop("Unknown distribution: ", dist)
   )
 }
 
@@ -58,13 +58,13 @@ ldist <- function(x, dist, theta, log = TRUE) {
 rdist <- function(n, dist, theta) {
   a <- theta[1]; b <- theta[2]
   switch(dist,
-    Weibull     = rweibull(n, shape = a, scale = b),
-    Frechet     = VGAM::rfrechet(n, shape = a, scale = b),
-    Gamma       = rgamma(n, shape = a, scale = b),
-    InvGamma    = actuar::rinvgamma(n, shape = a, scale = b),
-    LogNormal   = rlnorm(n, meanlog = a, sdlog = b),
-    LogLogistic = actuar::rllogis(n, shape = a, scale = b),
-    stop("Unknown distribution: ", dist)
+         Weibull     = rweibull(n, shape = a, scale = b),
+         Frechet     = VGAM::rfrechet(n, shape = a, scale = b),
+         Gamma       = rgamma(n, shape = a, scale = b),
+         InvGamma    = actuar::rinvgamma(n, shape = a, scale = b),
+         LogNormal   = rlnorm(n, meanlog = a, sdlog = b),
+         LogLogistic = actuar::rllogis(n, shape = a, scale = b),
+         stop("Unknown distribution: ", dist)
   )
 }
 
@@ -73,13 +73,13 @@ rdist <- function(n, dist, theta) {
 pdist <- function(q, dist, theta) {
   a <- theta[1]; b <- theta[2]
   switch(dist,
-    Weibull     = pweibull(q, shape = a, scale = b),
-    Frechet     = VGAM::pfrechet(q, shape = a, scale = b),
-    Gamma       = pgamma(q, shape = a, scale = b),
-    InvGamma    = actuar::pinvgamma(q, shape = a, scale = b),
-    LogNormal   = plnorm(q, meanlog = a, sdlog = b),
-    LogLogistic = actuar::pllogis(q, shape = a, scale = b),
-    stop("Unknown distribution: ", dist)
+         Weibull     = pweibull(q, shape = a, scale = b),
+         Frechet     = VGAM::pfrechet(q, shape = a, scale = b),
+         Gamma       = pgamma(q, shape = a, scale = b),
+         InvGamma    = actuar::pinvgamma(q, shape = a, scale = b),
+         LogNormal   = plnorm(q, meanlog = a, sdlog = b),
+         LogLogistic = actuar::pllogis(q, shape = a, scale = b),
+         stop("Unknown distribution: ", dist)
   )
 }
 
@@ -187,26 +187,32 @@ jacobian_J <- function(dist, theta, V) {
 # ----------------------------------------------------------------------------
 #' Closed-form Fisher information matrix
 #'
-#' Per-sample (unit) Fisher information matrix for the supported families. The
-#' Weibull/Frechet matrix uses the corrected positive-definite form derived in
-#' the methodology.
+#' Per-observation (unit) Fisher information matrix for the supported families.
+#' Weibull and Frechet share the same diagonal entries but differ in the SIGN
+#' of the off-diagonal (cross) term (log-inversion duality). The Log-Logistic
+#' matrix is the corrected form; an earlier version used the second log-cumulant
+#' Var(log X) = pi^2 / (3 a^2) for the (1,1) entry, which is not the shape
+#' information. All forms match the numerical observed information.
 #'
 #' @param dist Character; distribution name.
 #' @param theta Numeric length-2 parameter vector.
-#' @return A 2 by 2 Fisher information matrix.
+#' @return A 2 by 2 per-observation Fisher information matrix.
 #' @examples
 #' fisher_closed("Weibull", c(2, 1))
+#' fisher_closed("Frechet", c(2, 1))
 #' @export
 fisher_closed <- function(dist, theta) {
   a <- theta[1]; b <- theta[2]
   psi1 <- function(z) psigamma(z, 1)
   gam <- -psigamma(1, 0)   # Euler-Mascheroni constant ~ 0.5772
-  if (dist %in% c("Weibull", "Frechet")) {
-    # CORRECT Weibull/Frechet Fisher information (per observation).
-    # NOTE: the appendix of RAY-New.tex has an INCORRECT version
-    # (indefinite, det<0). Correct form below; matches observed information.
+  if (dist == "Weibull") {
+    # Diagonal shared with Frechet; cross term -(1 - gam)/b.
     matrix(c(a^-2 * (psi1(1) + (1 - gam)^2), -(1 - gam) / b,
              -(1 - gam) / b,                  a^2 / b^2), 2, 2, byrow = TRUE)
+  } else if (dist == "Frechet") {
+    # Same diagonal as Weibull; cross term flips sign to +(1 - gam)/b.
+    matrix(c(a^-2 * (psi1(1) + (1 - gam)^2), +(1 - gam) / b,
+             +(1 - gam) / b,                  a^2 / b^2), 2, 2, byrow = TRUE)
   } else if (dist == "Gamma") {
     matrix(c(psi1(a), 1 / b,
              1 / b,   a / b^2), 2, 2, byrow = TRUE)
@@ -216,7 +222,9 @@ fisher_closed <- function(dist, theta) {
   } else if (dist == "LogNormal") {
     matrix(c(b^-2, 0, 0, 2 * b^-2), 2, 2)
   } else if (dist == "LogLogistic") {
-    matrix(c(pi^2 / (3 * a^2), 0, 0, 1 / b^2), 2, 2)
+    # Corrected: (1,1) = (pi^2 + 3)/(9 a^2); (2,2) = a^2/(3 b^2).
+    matrix(c((pi^2 + 3) / (9 * a^2), 0,
+             0,                       a^2 / (3 * b^2)), 2, 2, byrow = TRUE)
   } else stop("Unknown distribution: ", dist)
 }
 
@@ -245,7 +253,7 @@ fisher_closed <- function(dist, theta) {
 #' @export
 mle_fit <- function(x, dist, init = NULL) {
   n <- length(x)
-
+  
   if (dist == "LogNormal") {
     lx <- log(x); mu <- mean(lx); sg <- sqrt(mean((lx - mu)^2))
     # Observed information for (mu, sigma): I = n*diag(1/sg^2, 2/sg^2)
@@ -253,7 +261,7 @@ mle_fit <- function(x, dist, init = NULL) {
     ll <- sum(dlnorm(x, mu, sg, log = TRUE))
     return(list(theta = c(mu, sg), Sigma = Sigma, loglik = ll, conv = TRUE))
   }
-
+  
   # For (alpha, lambda) families: optimize on log-scale (both positive)
   nll <- function(eta) {
     th <- exp(eta)
@@ -261,19 +269,19 @@ mle_fit <- function(x, dist, init = NULL) {
     if (any(!is.finite(v))) return(1e10)
     -sum(v)
   }
-
+  
   if (is.null(init)) {
     m <- mean(x); v <- var(x)
     init <- switch(dist,
-      Weibull     = c((m / sqrt(v))^1.086, m / gamma(1 + sqrt(v) / m)),
-      Frechet     = c(2.5, stats::median(x)),
-      Gamma       = c(m^2 / v, v / m),
-      InvGamma    = c(m^2 / v + 2, m * (m^2 / v + 1)),
-      LogLogistic = c(2, stats::median(x))
+                   Weibull     = c((m / sqrt(v))^1.086, m / gamma(1 + sqrt(v) / m)),
+                   Frechet     = c(2.5, stats::median(x)),
+                   Gamma       = c(m^2 / v, v / m),
+                   InvGamma    = c(m^2 / v + 2, m * (m^2 / v + 1)),
+                   LogLogistic = c(2, stats::median(x))
     )
     init[init <= 0 | !is.finite(init)] <- 1
   }
-
+  
   opt <- tryCatch(
     optim(log(init), nll, method = "Nelder-Mead",
           control = list(maxit = 1000, reltol = 1e-10)),
@@ -285,7 +293,7 @@ mle_fit <- function(x, dist, init = NULL) {
   }
   if (is.null(opt)) return(list(theta = c(NA, NA), Sigma = NULL,
                                 loglik = NA, conv = FALSE))
-
+  
   theta <- exp(opt$par)
   # Observed information on the natural scale via numerical Hessian of nll(theta)
   nll_nat <- function(th) {

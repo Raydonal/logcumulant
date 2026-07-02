@@ -12,13 +12,17 @@ fisher_closed(dist, theta)
 \item{theta}{Numeric length-2 parameter vector.}
 }
 \value{
-A 2 by 2 Fisher information matrix.
+A 2 by 2 per-observation Fisher information matrix.
 }
 \description{
-Per-sample (unit) Fisher information matrix for the supported families. The
-Weibull/Frechet matrix uses the corrected positive-definite form derived in
-the methodology.
+Per-observation (unit) Fisher information matrix for the supported families.
+Weibull and Frechet share the same diagonal entries but differ in the SIGN
+of the off-diagonal (cross) term (log-inversion duality). The Log-Logistic
+matrix is the corrected form; an earlier version used the second log-cumulant
+Var(log X) = pi^2 / (3 a^2) for the (1,1) entry, which is not the shape
+information. All forms match the numerical observed information.
 }
 \examples{
 fisher_closed("Weibull", c(2, 1))
+fisher_closed("Frechet", c(2, 1))
 }
